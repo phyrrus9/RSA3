@@ -3,13 +3,14 @@
 #include <time.h>
 #include <stdio.h>
 
-#define BITWIDTH 4096
-#define BITWIDTH_E (BITWIDTH/2)
+#define BITWIDTH 8
+#define BITWIDTH_E (BITWIDTH)
+#define PROBABRUN 25
 
 void print_status(mpz_t p, const char *s)
 {
-	printf("[STATUS] %s=0x", s);
-	mpz_out_str(stdout, 16, p);
+	printf("[STATUS] %s=", s);
+	mpz_out_str(stdout, 10, p);
 	printf("\n");
 	fflush(stdout);
 }
@@ -28,7 +29,7 @@ char isPrime(mpz_t p)
 {
 	mpz_t sqrtq, i, tmp;
 	char ret = 1;
-	int probab = mpz_probab_prime_p(p, BITWIDTH / 4);
+	int probab = mpz_probab_prime_p(p, PROBABRUN);
 
 	if (probab == 2) return 1;
 	else if (probab == 0) return 0;
@@ -106,7 +107,7 @@ void *gen_binary(mpz_t r, unsigned long *size)
 {
 	size_t words_alloc;
 	void *ret = mpz_export(NULL, &words_alloc, 1, 1, 1, 0, r);
-	*size = words_alloc * 4;
+	*size = words_alloc;
 	return ret;
 }
 
