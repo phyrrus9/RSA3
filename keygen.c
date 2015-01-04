@@ -30,6 +30,33 @@ modInverseDone:
 	mpz_clears(atmp, tmp, tmpm, NULL);
 }
 
+void modInverse2(mpz_t x1, mpz_t a, mpz_t b)
+{
+	mpz_t b0, t, q, x0, a0, b1;
+	mpz_inits(b0, t, q, x0, a0, b1, NULL);
+	mpz_set(b0, b);
+	mpz_set(b1, b);
+	mpz_set(a0, a);
+	mpz_set_ui(x1, 1);
+	if (mpz_cmp_ui(b, 1) > 0)
+		goto modInverse2Done;
+	while (mpz_cmp_ui(a0, 1) > 0)
+	{
+		mpz_div(q, a, b);
+		mpz_set(t, b);
+		mpz_mod(b1, a0, b1)
+		mpz_set(a0, t);
+		mpz_set(t, x0);
+		mpz_sub(x1, x1, q);
+		mpz_mul(x0, x1, x0);
+		mpz_set(x1, t);
+	}
+	if (mpz_cmp_ui(x1, 0) < 0)
+		mpz_add(x1, x1, b0);
+modInverse2Done:
+	mpz_clears(b0, t, q, x0, a0, b1, NULL);
+}
+
 void totient(mpz_t ret, mpz_t p, mpz_t q)
 {
 	mpz_t pt, qt;
