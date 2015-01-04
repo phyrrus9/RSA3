@@ -3,8 +3,8 @@
 #include <time.h>
 #include <stdio.h>
 
-#define BITWIDTH 128
-#define BITWIDTH_E (BITWIDTH/4)
+#define BITWIDTH 4096
+#define BITWIDTH_E (BITWIDTH/2)
 
 void print_status(mpz_t p, const char *s)
 {
@@ -12,49 +12,6 @@ void print_status(mpz_t p, const char *s)
 	mpz_out_str(stdout, 16, p);
 	printf("\n");
 	fflush(stdout);
-}
-
-void modInverse(mpz_t ret, mpz_t a, mpz_t m)
-{
-	mpz_t atmp, tmp, tmpm;
-	mpz_inits(atmp, tmp, tmpm, NULL);
-	mpz_mod(atmp, a, m);
-	for (mpz_set_ui(ret, 2); mpz_cmp(ret, m) < 0; mpz_add_ui(ret, ret, 1))
-	{
-		mpz_mul(tmp, atmp, ret);
-		mpz_mod(tmp, tmp, m);
-		if (mpz_cmp_ui(tmp, 1) == 0)
-			goto modInverseDone;
-	}
-modInverseDone:
-	mpz_clears(atmp, tmp, tmpm, NULL);
-}
-
-void modInverse2(mpz_t x1, mpz_t a, mpz_t b)
-{
-	mpz_t b0, t, q, x0, a0, b1;
-	mpz_inits(b0, t, q, x0, a0, b1, NULL);
-	mpz_set(b0, b);
-	mpz_set(b1, b);
-	mpz_set(a0, a);
-	mpz_set_ui(x1, 1);
-	if (mpz_cmp_ui(b, 1) > 0)
-		goto modInverse2Done;
-	while (mpz_cmp_ui(a0, 1) > 0)
-	{
-		mpz_div(q, a, b);
-		mpz_set(t, b);
-		mpz_mod(b1, a0, b1)
-		mpz_set(a0, t);
-		mpz_set(t, x0);
-		mpz_sub(x1, x1, q);
-		mpz_mul(x0, x1, x0);
-		mpz_set(x1, t);
-	}
-	if (mpz_cmp_ui(x1, 0) < 0)
-		mpz_add(x1, x1, b0);
-modInverse2Done:
-	mpz_clears(b0, t, q, x0, a0, b1, NULL);
 }
 
 void totient(mpz_t ret, mpz_t p, mpz_t q)
@@ -70,8 +27,13 @@ void totient(mpz_t ret, mpz_t p, mpz_t q)
 char isPrime(mpz_t p)
 {
 	mpz_t sqrtq, i, tmp;
-	mpz_inits(sqrtq, i, tmp, NULL);
 	char ret = 1;
+	int probab = mpz_probab_prime_p(p, BITWIDTH / 4);
+
+	if (probab == 2) return 1;
+	else if (probab == 0) return 0;
+
+	mpz_inits(sqrtq, i, tmp, NULL);
 	mpz_sqrt(sqrtq, p);
 	for (mpz_set_ui(i, 2); mpz_cmp(i, sqrtq) < 0 && ret == 1;mpz_add_ui(i, i, 1))
 	{
@@ -137,7 +99,7 @@ void gen_e(mpz_t e, mpz_t x)
 
 void gen_d(mpz_t d, mpz_t e, mpz_t x)
 {
-	modInverse(d, e, x);
+	mpz_invert(d, e, x);
 }
 
 void *gen_binary(mpz_t r, unsigned long *size)
