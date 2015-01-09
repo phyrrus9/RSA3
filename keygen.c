@@ -7,6 +7,8 @@
 #define BITWIDTH_E (BITWIDTH)
 #define PROBABRUN 25
 
+gmp_randstate_t rstate;
+
 void print_status(mpz_t p, const char *s)
 {
 	printf("[STATUS] %s=", s);
@@ -47,17 +49,15 @@ isPrimeDone:
 	return ret;
 }
 
+void seed_randstate(gmp_randstate_t *rstate)
+{
+	gmp_randinit_default(*rstate);
+	gmp_randseed_ui(*rstate, time(NULL));
+}
+
 void gen_pq(mpz_t r)
 {
-	gmp_randstate_t rstate;
-	unsigned long seed;
-	gmp_randinit_default(rstate);
-	seed = time(NULL);
-	gmp_randseed_ui(rstate, seed);
-
 	do { mpz_urandomb(r, rstate, BITWIDTH); } while (!isPrime(r));
-
-	gmp_randclear(rstate);
 }
 
 void gen_n(mpz_t n, mpz_t p, mpz_t q)
@@ -72,14 +72,8 @@ void gen_x(mpz_t x, mpz_t p, mpz_t q)
 
 void gen_e(mpz_t e, mpz_t x)
 {
-	gmp_randstate_t rstate;
 	mpz_t i;
-	unsigned long seed;
 	mpz_init(i);
-
-	gmp_randinit_default(rstate);
-	seed = time(NULL);
-	gmp_randseed_ui(rstate, seed);
 
 	mpz_urandomb(e, rstate, BITWIDTH_E);
 	mpz_nextprime(e, e);
@@ -136,6 +130,7 @@ int main()
 {
 	mpz_t p, q, x, n, d, e;
 	mpz_inits(p, q, x, n, d, e, NULL);
+	seed_randstate(&rstate);
 
 	gen_pq(p);
 	gen_pq(q);
@@ -159,4 +154,5 @@ int main()
 	write_keyfile("rsa.pri", n, d);
 
 	mpz_clears(p, q, x, n, d, e, NULL);
+	gmp_randclear(rstate);
 }
