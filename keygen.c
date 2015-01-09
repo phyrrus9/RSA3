@@ -3,18 +3,22 @@
 #include <time.h>
 #include <stdio.h>
 
-#define BITWIDTH 8
-#define BITWIDTH_E (BITWIDTH)
-#define PROBABRUN 25
+#define BITWIDTH 2048
+#define BITWIDTH_E (BITWIDTH/6)
+#define PROBABRUN ((unsigned long)((double)BITWIDTH/1.2))
+
+#define DEBUG_ENABLE 0
 
 gmp_randstate_t rstate;
 
 void print_status(mpz_t p, const char *s)
 {
-	printf("[STATUS] %s=", s);
-	mpz_out_str(stdout, 10, p);
+#if DEBUG_ENABLE == 1
+	printf("[STATUS] %s=0x", s);
+	mpz_out_str(stdout, 16, p);
 	printf("\n");
 	fflush(stdout);
+#endif
 }
 
 void totient(mpz_t ret, mpz_t p, mpz_t q)
@@ -112,7 +116,7 @@ void write_keyfile(char *fname, mpz_t r1, mpz_t r2)
 	FILE *f;
 	r1v = gen_binary(r1, &r1s);
 	r2v = gen_binary(r2, &r2s);
-	printf("r1s=%lu\tr2s=%lu\n", r1s, r2s);
+//	printf("r1s=%lu\tr2s=%lu\n", r1s, r2s);
 	r1s = htonl(r1s);
 	r2s = htonl(r2s);
 	f = fopen(fname, "wb");
